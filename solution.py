@@ -12,7 +12,7 @@ ICMP_ECHO_REQUEST = 8
 
 
 def checksum(string):
-    print('Entering checksum')
+    # print('Entering checksum')
     csum = 0
     countTo = (len(string) // 2) * 2
     count = 0
