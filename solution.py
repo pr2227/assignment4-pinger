@@ -1,6 +1,7 @@
 #from msilib import sequence
 from socket import *
 import os
+from statistics import stdev
 import sys
 import struct
 import time
@@ -45,7 +46,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         #print('startedSelect is ', end = '')
         #print(startedSelect)
         whatReady = select.select([mySocket], [], [], timeLeft)
-        howLongInSelect = (time.time() - startedSelect)
+        #howLongInSelect = (time.time() - startedSelect)
         if whatReady[0] == []:  # Timeout
             return "Request timed out."
 
@@ -80,7 +81,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
             return delay
         #packedTime = struct.unpack("d", recvPacket[28:28 + bytes])[0]
         # Fill in end
-        timeLeft = timeLeft - howLongInSelect
+        #timeLeft = timeLeft - howLongInSelect
         if timeLeft <= 0:
             return "Request timed out."
 
@@ -137,14 +138,26 @@ def ping(host, timeout=1):
     
     #Send ping requests to a server separated by approximately one second
     #Add something here to collect the delays of each ping in a list so you can calculate vars after your ping
-    
+    listOfDelay = []
     for i in range(0,4): #Four pings will be sent (loop runs for i=0, 1, 2, 3)
         delay = doOnePing(dest, timeout)
         print(delay)
         time.sleep(1)  # one second
+        listOfDelay.append(delay)
+
+
+    packet_min =min(listOfDelay)
+    #print('packet_min is:' + str(packet_min))
+    packet_avg = sum(listOfDelay) / len(listOfDelay)
+    #print('packet_avg is:' + str(packet_avg))
+    packet_max = max(listOfDelay)
+    #print('packet_max is:' + str(packet_max))
+    stdev_var = (sum((x-(sum(listOfDelay) / len(listOfDelay)))**2 for x in listOfDelay) / (len(listOfDelay)-1))**0.5
+    #print('stdev is ' + str(stdev_var))
+
         
     #You should have the values of delay for each ping here; fill in calculation for packet_min, packet_avg, packet_max, and stdev
-    # vars = [str(round(packet_min, 8)), str(round(packet_avg, 8)), str(round(packet_max, 8)),str(round(stdev(stdev_var), 8))]
+    vars = [str(round(packet_min, 8)), str(round(packet_avg, 8)), str(round(packet_max, 8)),str(round(stdev(stdev_var), 8))]
 
     return vars
 
